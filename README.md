@@ -18,8 +18,53 @@ Synthesis requires three files as follows,
 
 ◦ Verilog/VHDL Files (.v or .vhdl or .vhd)
 
-◦ SDC (Synopsis Design Constraint) File (.sdc)
-
+◦ SDC (Synopsis Design Constraint) File (.sdc) 
+counter.tcl
+```
+read_libs/cadence/install/FOUNDRY-01/digital/90nm/dig/lib/slow.lib
+read hdl counter.v
+elaborate
+read_sdc counter_input_constraint.sdc
+syn_generic
+report_area
+syn_map
+report_a
+syn_opt
+report_area
+report_area > counter area.txt
+report_power > counter_power.txt
+report_gates > counter_cells.rpt
+report_timing > counter_timing.txt
+write_hdl > counter netlist.v
+write_sdc > counter_output_constraints.sdc
+gui_show
+```
+counter.v:
+```
+`timescale 1ns/1ns
+module counter(clk,m,rst,count);
+input clk,m,rst;
+output reg [3:0] count;
+always@(posedge clk or negedge rst)
+begin
+if (!rst)
+count=0;
+else if(m)
+count=count+1;
+else
+count=count-1;
+end
+endmodule
+```
+input constraint.sdc:
+```
+create_clock name clk period 2 waveform {01} [get_ports "clk"]
+set_clock_transition rise 0.1 [get_clocks "clk"]
+set_clock transition fall 0.1 [get_clocks "clk"]
+set_clock_uncertainty 0.01 [get_ports "clk"]
+set_input_delay max 0.8 [get_ports "rst"] -clock [get_clocks "clk"]
+set output delay-max 0.8 [get_ports "count"] -clock [get_clocks "clk"]
+```
  ### Step 2 : Creating an SDC File
 
 •	In your terminal type “gedit input_constraints.sdc” to create an SDC File if you do not have one.
@@ -64,12 +109,16 @@ used.
 • Genus Script file with .tcl file Extension commands are executed one by one to synthesize the netlist.
 
 #### Synthesis RTL Schematic :
+![Screenshot 2025-05-22 123432](https://github.com/user-attachments/assets/fc16b550-ef7e-493b-9385-2702eedb9828)
 
 #### Area report:
+![Screenshot 2025-05-22 123543](https://github.com/user-attachments/assets/3b8df76b-7b72-4bf3-8013-9093602c61f7)
 
 #### Power Report:
+![Screenshot 2025-05-22 123555](https://github.com/user-attachments/assets/6a58caf9-ecc3-4a48-9071-1c4da2cc7057)
 
 #### Timing Report: 
+![image](https://github.com/user-attachments/assets/97ceee98-2e52-44a0-8a8d-730905bb12d5)
 
 #### Result: 
 
